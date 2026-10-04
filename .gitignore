@@ -44,3 +44,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# local ETL download cache
+/.data/

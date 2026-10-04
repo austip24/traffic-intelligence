@@ -15,7 +15,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useSelection } from "@/components/explorer/explorer-provider"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { selectionKey } from "@/lib/explorer/url-state"
 import { cn } from "@/lib/utils"
 
 type ExplorerShellProps = {
@@ -47,6 +49,16 @@ export function ExplorerShell({
   const [sideCollapsed, setSideCollapsed] = useState(false)
   const [sideSheetOpen, setSideSheetOpen] = useState(false)
   const [inspectorSheetOpen, setInspectorSheetOpen] = useState(false)
+
+  // Selecting something on the map opens the details sheet where the
+  // inspector isn't docked (adjusting state during render, not in an effect).
+  const { selection } = useSelection()
+  const currentKey = selection ? selectionKey(selection) : null
+  const [lastKey, setLastKey] = useState(currentKey)
+  if (currentKey !== lastKey) {
+    setLastKey(currentKey)
+    if (currentKey && !isXl) setInspectorSheetOpen(true)
+  }
 
   const sidePanelVisible = isLg ? !sideCollapsed : sideSheetOpen
   const toggleSidePanel = () => {
@@ -85,7 +97,7 @@ export function ExplorerShell({
             onClick={() => setInspectorSheetOpen(true)}
           >
             <PanelRight />
-            Details
+            <span className="max-sm:sr-only">Details</span>
           </Button>
           {headerActions}
         </div>
@@ -109,7 +121,8 @@ export function ExplorerShell({
           aria-label="Details"
           className="hidden w-96 shrink-0 flex-col border-l bg-background xl:flex"
         >
-          {inspector}
+          {/* Mounted only when docked, so a hidden copy never fetches data. */}
+          {isXl && inspector}
         </aside>
       </div>
 
@@ -117,7 +130,7 @@ export function ExplorerShell({
         <SheetContent
           side={isMd ? "left" : "bottom"}
           showCloseButton={false}
-          className={cn("gap-0 p-0", !isMd && "h-[80svh]")}
+          className="gap-0 p-0 data-[side=bottom]:h-[80svh]"
         >
           <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
             <SheetTitle className="text-sm">Layers and filters</SheetTitle>
@@ -137,10 +150,18 @@ export function ExplorerShell({
       >
         <SheetContent
           side={isMd ? "right" : "bottom"}
-          className={cn("gap-0 p-0", !isMd && "h-[70svh]")}
+          showCloseButton={false}
+          className="gap-0 p-0 data-[side=bottom]:h-[70svh]"
         >
-          <SheetTitle className="sr-only">Details</SheetTitle>
-          {inspector}
+          <div className="flex h-10 shrink-0 items-center justify-between border-b px-3">
+            <SheetTitle className="text-sm">Details</SheetTitle>
+            <SheetClose
+              render={<Button variant="ghost" size="icon-sm" aria-label="Close details" />}
+            >
+              <X />
+            </SheetClose>
+          </div>
+          <div className="min-h-0 flex-1">{inspector}</div>
         </SheetContent>
       </Sheet>
     </div>

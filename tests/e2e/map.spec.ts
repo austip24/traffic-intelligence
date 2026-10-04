@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+
+import { expect, test } from "./fixtures"
 
 const VIEWPORT_IN_URL = /lng=-?\d+\.\d+&lat=-?\d+\.\d+&z=\d+\.\d{2}/
 
@@ -31,7 +33,9 @@ test("panning writes the viewport to the URL", async ({ page }) => {
   await waitForMap(page)
   await expect(page).not.toHaveURL(VIEWPORT_IN_URL)
 
-  await dragMap(page, -150, -80)
+  // Release on bare map: MapLibre only ends a mouse drag on a mouseup over the
+  // map element itself, and the legend sits top-left.
+  await dragMap(page, 120, 80)
   await expect(page).toHaveURL(VIEWPORT_IN_URL)
 })
 

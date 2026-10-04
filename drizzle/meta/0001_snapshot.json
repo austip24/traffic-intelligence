@@ -1,0 +1,649 @@
+{
+  "id": "54310d12-9311-46a4-9e93-23e4211d93b5",
+  "prevId": "6a9d080c-c23a-4659-8b64-bf8dd6c93f3e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.area_population": {
+      "name": "area_population",
+      "schema": "",
+      "columns": {
+        "geoid": {
+          "name": "geoid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "population": {
+          "name": "population",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "area_population_geoid_areas_geoid_fk": {
+          "name": "area_population_geoid_areas_geoid_fk",
+          "tableFrom": "area_population",
+          "tableTo": "areas",
+          "columnsFrom": [
+            "geoid"
+          ],
+          "columnsTo": [
+            "geoid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "area_population_geoid_year_pk": {
+          "name": "area_population_geoid_year_pk",
+          "columns": [
+            "geoid",
+            "year"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.areas": {
+      "name": "areas",
+      "schema": "",
+      "columns": {
+        "geoid": {
+          "name": "geoid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_fips": {
+          "name": "state_fips",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "land_area_m2": {
+          "name": "land_area_m2",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_area_m2": {
+          "name": "water_area_m2",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tiger_vintage": {
+          "name": "tiger_vintage",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(MultiPolygon,4326)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "geom_3857": {
+          "name": "geom_3857",
+          "type": "geometry(MultiPolygon,3857)",
+          "primaryKey": false,
+          "notNull": true,
+          "generated": {
+            "as": "ST_Transform(geom, 3857)",
+            "type": "stored"
+          }
+        },
+        "label_point": {
+          "name": "label_point",
+          "type": "geometry(Point,4326)",
+          "primaryKey": false,
+          "notNull": true,
+          "generated": {
+            "as": "ST_PointOnSurface(geom)",
+            "type": "stored"
+          }
+        }
+      },
+      "indexes": {
+        "areas_geom_idx": {
+          "name": "areas_geom_idx",
+          "columns": [
+            {
+              "expression": "geom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        },
+        "areas_geom_3857_idx": {
+          "name": "areas_geom_3857_idx",
+          "columns": [
+            {
+              "expression": "geom_3857",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        },
+        "areas_level_state_idx": {
+          "name": "areas_level_state_idx",
+          "columns": [
+            {
+              "expression": "level",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "state_fips",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "areas_name_trgm_idx": {
+          "name": "areas_name_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"name\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "areas_level_check": {
+          "name": "areas_level_check",
+          "value": "\"areas\".\"level\" in ('state', 'county')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.crash_people": {
+      "name": "crash_people",
+      "schema": "",
+      "columns": {
+        "crash_id": {
+          "name": "crash_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vehicle_number": {
+          "name": "vehicle_number",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_number": {
+          "name": "person_number",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_type": {
+          "name": "person_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "injury_severity": {
+          "name": "injury_severity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age": {
+          "name": "age",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sex": {
+          "name": "sex",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "crash_people_crash_id_crashes_id_fk": {
+          "name": "crash_people_crash_id_crashes_id_fk",
+          "tableFrom": "crash_people",
+          "tableTo": "crashes",
+          "columnsFrom": [
+            "crash_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "crash_people_crash_id_vehicle_number_person_number_pk": {
+          "name": "crash_people_crash_id_vehicle_number_person_number_pk",
+          "columns": [
+            "crash_id",
+            "vehicle_number",
+            "person_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.crashes": {
+      "name": "crashes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "st_case": {
+          "name": "st_case",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "crash_date": {
+          "name": "crash_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hour": {
+          "name": "hour",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "minute": {
+          "name": "minute",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fatalities": {
+          "name": "fatalities",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "persons": {
+          "name": "persons",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vehicles": {
+          "name": "vehicles",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "involves_pedestrian": {
+          "name": "involves_pedestrian",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "involves_bicyclist": {
+          "name": "involves_bicyclist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "involves_motorcyclist": {
+          "name": "involves_motorcyclist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alcohol_involved": {
+          "name": "alcohol_involved",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "speeding_involved": {
+          "name": "speeding_involved",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "light_condition": {
+          "name": "light_condition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weather": {
+          "name": "weather",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rural_urban": {
+          "name": "rural_urban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "functional_class": {
+          "name": "functional_class",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_fips": {
+          "name": "state_fips",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fars_county_code": {
+          "name": "fars_county_code",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "county_geoid": {
+          "name": "county_geoid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "county_match": {
+          "name": "county_match",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(Point,4326)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom_3857": {
+          "name": "geom_3857",
+          "type": "geometry(Point,3857)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "ST_Transform(geom, 3857)",
+            "type": "stored"
+          }
+        }
+      },
+      "indexes": {
+        "crashes_geom_3857_idx": {
+          "name": "crashes_geom_3857_idx",
+          "columns": [
+            {
+              "expression": "geom_3857",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        },
+        "crashes_year_idx": {
+          "name": "crashes_year_idx",
+          "columns": [
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "crashes_county_year_idx": {
+          "name": "crashes_county_year_idx",
+          "columns": [
+            {
+              "expression": "county_geoid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "crashes_state_year_idx": {
+          "name": "crashes_state_year_idx",
+          "columns": [
+            {
+              "expression": "state_fips",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "crashes_county_geoid_areas_geoid_fk": {
+          "name": "crashes_county_geoid_areas_geoid_fk",
+          "tableFrom": "crashes",
+          "tableTo": "areas",
+          "columnsFrom": [
+            "county_geoid"
+          ],
+          "columnsTo": [
+            "geoid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.datasets": {
+      "name": "datasets",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "publisher": {
+          "name": "publisher",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "license": {
+          "name": "license",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attribution": {
+          "name": "attribution",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_count": {
+          "name": "row_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_report": {
+          "name": "quality_report",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retrieved_at": {
+          "name": "retrieved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "loaded_at": {
+          "name": "loaded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

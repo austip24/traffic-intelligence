@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import { parseViewport, writeViewport } from "./url-state"
+import {
+  parseAreaMetric,
+  parseSelection,
+  parseViewport,
+  toQueryString,
+  writeAreaMetric,
+  writeSelection,
+  writeViewport,
+} from "./url-state"
 
 describe("parseViewport", () => {
   it("parses a complete, valid viewport", () => {
@@ -47,5 +55,50 @@ describe("writeViewport", () => {
       zoom: 2,
     })
     expect(params.get("layers")).toBe("crashes")
+  })
+})
+
+describe("parseSelection", () => {
+  it.each([
+    ["sel=crash-2023012345", { type: "crash", id: 2023012345 }],
+    ["sel=area-17031", { type: "area", geoid: "17031" }],
+    ["sel=area-06", { type: "area", geoid: "06" }],
+  ])("parses %s", (query, expected) => {
+    expect(parseSelection(new URLSearchParams(query))).toEqual(expected)
+  })
+
+  it.each([
+    "",
+    "sel=crash-abc",
+    "sel=crash-1999000001",
+    "sel=area-170",
+    "sel=area-1703x",
+    "sel=road:1",
+    "sel=area",
+  ])("ignores %j", (query) => {
+    expect(parseSelection(new URLSearchParams(query))).toBeNull()
+  })
+
+  it("round-trips through writeSelection", () => {
+    const selection = { type: "area", geoid: "17031" } as const
+    expect(parseSelection(writeSelection(new URLSearchParams(), selection))).toEqual(selection)
+    expect(writeSelection(new URLSearchParams("sel=area-01&x=1"), null).toString()).toBe("x=1")
+  })
+})
+
+describe("area metric param", () => {
+  it("falls back to the default and omits it when writing", () => {
+    expect(parseAreaMetric(new URLSearchParams("metric=bogus"))).toBe("rate")
+    expect(parseAreaMetric(new URLSearchParams("metric=deaths"))).toBe("deaths")
+    expect(writeAreaMetric(new URLSearchParams("metric=deaths"), "rate").has("metric")).toBe(false)
+  })
+})
+
+describe("toQueryString", () => {
+  it("keeps commas readable and round-trips", () => {
+    const params = new URLSearchParams({ layers: "areas,crashes", sel: "area-06" })
+    const query = toQueryString(params)
+    expect(query).toBe("layers=areas,crashes&sel=area-06")
+    expect(new URLSearchParams(query).get("layers")).toBe("areas,crashes")
   })
 })

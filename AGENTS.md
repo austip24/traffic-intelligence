@@ -333,12 +333,15 @@ Do not load an entire national road network into the browser simply because it i
 
 Use **shadcn/ui** for application UI primitives.
 
+Documentation: https://ui.shadcn.com/llms.txt
+
 Prefer existing shadcn components before creating custom equivalents.
 
 Common components include:
 
 - Button
 - Card
+- Chart
 - Dialog
 - Sheet
 - Tabs

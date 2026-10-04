@@ -1,8 +1,21 @@
 "use client"
 
 import { MonitorX } from "lucide-react"
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
+import { AreaMetricsState } from "@/components/map/area-metrics-state"
+import { MapBridge } from "@/components/map/map-bridge"
+import { MapInteractions } from "@/components/map/map-interactions"
+import { MapLegend } from "@/components/map/map-legend"
+import { MapStatusBar } from "@/components/map/map-status-bar"
+import { RegistryLayers } from "@/components/map/registry-layers"
+import { SelectionHighlight } from "@/components/map/selection-highlight"
 import { ViewportUrlSync } from "@/components/map/viewport-url-sync"
 import {
   Empty,
@@ -65,6 +78,15 @@ export function ExplorerMap() {
   const [initialView, setInitialView] = useState(readInitialView)
   const lastViewRef = useRef<MapView | null>(null)
 
+  // Opened from a link that names a selection but no viewport: go to it.
+  const [fitSelectionOnLoad] = useState(() => initialView === null)
+
+  // Interactive overlays (the legend, tooltips) are portaled into this sibling of the
+  // MapLibre container so their wheel, click and dblclick events never reach
+  // MapLibre's handlers (scrolling the legend shouldn't zoom the map, and
+  // clicking it shouldn't select features underneath).
+  const [overlayRoot, setOverlayRoot] = useState<HTMLDivElement | null>(null)
+
   const handleViewSettled = useCallback((view: MapView) => {
     lastViewRef.current = view
   }, [])
@@ -97,19 +119,33 @@ export function ExplorerMap() {
   }
 
   return (
-    <Map
-      {...initialCamera(initialView)}
-      styles={basemapStyles}
-      dragRotate={false}
-      pitchWithRotate={false}
-      touchPitch={false}
-      maxPitch={0}
-      className="size-full"
-    >
-      <ReadyMarker />
-      <LockRotation />
-      <ViewportUrlSync onViewSettled={handleViewSettled} />
-      <MapControls position="bottom-right" showZoom showLocate />
-    </Map>
+    <div className="relative size-full">
+      <Map
+        {...initialCamera(initialView)}
+        styles={basemapStyles}
+        dragRotate={false}
+        pitchWithRotate={false}
+        touchPitch={false}
+        maxPitch={0}
+        className="size-full"
+      >
+        <ReadyMarker />
+        <LockRotation />
+        <ViewportUrlSync onViewSettled={handleViewSettled} />
+        <MapBridge />
+        <RegistryLayers />
+        {/* After RegistryLayers: applies state to the sources it creates. */}
+        <AreaMetricsState />
+        <SelectionHighlight fitOnLoad={fitSelectionOnLoad} />
+        <MapStatusBar />
+        {overlayRoot && <MapLegend portalTo={overlayRoot} />}
+        {overlayRoot && <MapInteractions portalTo={overlayRoot} />}
+        <MapControls position="bottom-right" showZoom showLocate />
+      </Map>
+      <div
+        ref={setOverlayRoot}
+        className="pointer-events-none absolute inset-0 z-10"
+      />
+    </div>
   )
 }

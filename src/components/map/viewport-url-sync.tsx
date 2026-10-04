@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 
 import { useMap } from "@/components/ui/map"
-import { writeViewport } from "@/lib/explorer/url-state"
+import { toQueryString, writeViewport } from "@/lib/explorer/url-state"
 import type { MapView } from "@/types/geo"
 
 const URL_WRITE_DELAY_MS = 300
@@ -45,7 +45,7 @@ export function ViewportUrlSync({ onViewSettled }: ViewportUrlSyncProps) {
         window.history.replaceState(
           null,
           "",
-          `${window.location.pathname}?${params.toString()}`
+          `${window.location.pathname}?${toQueryString(params)}`
         )
       }, URL_WRITE_DELAY_MS)
     }

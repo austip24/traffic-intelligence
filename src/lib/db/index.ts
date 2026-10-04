@@ -10,7 +10,7 @@ import * as schema from "./schema"
 type Database = ReturnType<typeof createDb>
 
 function createDb() {
-  const client = postgres(serverEnv().DATABASE_URL, {
+  const client = postgres(serverEnv().TRAFFIC_INTELLIGENCE_DATABASE_URL, {
     // The pooled Neon URL runs PgBouncer in transaction mode, which doesn't
     // support named prepared statements.
     prepare: false,

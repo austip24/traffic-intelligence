@@ -10,7 +10,7 @@ MapLibre GL JS.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # add DATABASE_URL (+ DATABASE_URL_UNPOOLED)
+cp .env.example .env.local   # add TRAFFIC_INTELLIGENCE_DATABASE_URL (+ TRAFFIC_INTELLIGENCE_DATABASE_URL_UNPOOLED)
 pnpm db:migrate              # create tables (enables postgis + pg_trgm)
 pnpm etl:all                 # download public data and load it (~10–20 min)
 pnpm dev                     # http://localhost:3000 → /map
@@ -21,24 +21,24 @@ pnpm dev                     # http://localhost:3000 → /map
 Everything is built from public, unauthenticated downloads, so the database
 can be reproduced from scratch with `pnpm etl:all`.
 
-| Dataset | Source | Years | Used for |
-| ------- | ------ | ----- | -------- |
-| Fatal crashes, people | [NHTSA FARS](https://www.nhtsa.gov/crash-data-systems/fatality-analysis-reporting-system) | 2010–2024 (2024 preliminary) | Crash points, trends, filters |
-| State + county boundaries | [Census cartographic boundaries](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) 1:500k | 2024 | Choropleths, spatial joins |
-| Population | [Census Population Estimates](https://www.census.gov/programs-surveys/popest.html) | 2010–2024 | Per-capita rates |
+| Dataset                   | Source                                                                                                                               | Years                        | Used for                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- | ----------------------------- |
+| Fatal crashes, people     | [NHTSA FARS](https://www.nhtsa.gov/crash-data-systems/fatality-analysis-reporting-system)                                            | 2010–2024 (2024 preliminary) | Crash points, trends, filters |
+| State + county boundaries | [Census cartographic boundaries](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) 1:500k | 2024                         | Choropleths, spatial joins    |
+| Population                | [Census Population Estimates](https://www.census.gov/programs-surveys/popest.html)                                                   | 2010–2024                    | Per-capita rates              |
 
 All three are U.S. Government works in the public domain; attribution is
 recorded in the `datasets` table.
 
 ### ETL steps
 
-| Command               | What it does                                                 |
-| --------------------- | ------------------------------------------------------------ |
-| `pnpm etl:download`   | Fetch source files into `.data/raw` (cached, ~400 MB)         |
-| `pnpm etl:boundaries` | Load the 50 states + DC and their counties into `areas`      |
-| `pnpm etl:population` | Load yearly population estimates into `area_population`      |
-| `pnpm etl:fars`       | Load crashes and people, one year per transaction            |
-| `pnpm etl:report`     | Print data-quality metrics; exits non-zero if a check fails  |
+| Command               | What it does                                                |
+| --------------------- | ----------------------------------------------------------- |
+| `pnpm etl:download`   | Fetch source files into `.data/raw` (cached, ~400 MB)       |
+| `pnpm etl:boundaries` | Load the 50 states + DC and their counties into `areas`     |
+| `pnpm etl:population` | Load yearly population estimates into `area_population`     |
+| `pnpm etl:fars`       | Load crashes and people, one year per transaction           |
+| `pnpm etl:report`     | Print data-quality metrics; exits non-zero if a check fails |
 
 `pnpm etl:fars --years 2020-2024` reloads a range; `--dry-run` parses and
 validates without a database.
@@ -78,29 +78,29 @@ generic errors (details are logged server-side). Crash filters use the same
 parameters as the map URL (`from`, `to`, `user`, `light`, `setting`, `road`).
 Adding `v=<dataVersion>` makes a response cacheable as immutable.
 
-| Endpoint                         | Returns                                                        |
-| -------------------------------- | -------------------------------------------------------------- |
+| Endpoint                           | Returns                                                      |
+| ---------------------------------- | ------------------------------------------------------------ |
 | `/api/tiles/{crashes,areas}/z/x/y` | Mapbox Vector Tiles (density cells below z11, crashes above) |
-| `/api/crashes/summary`           | National totals and crashes per year                           |
-| `/api/crashes/viewport?bbox=`    | Totals, road users and top counties inside a bbox              |
-| `/api/crashes/{id}`              | One crash and the people involved                              |
-| `/api/areas/metrics?metric=`     | `rate`, `deaths` or `crashes` for every state and county       |
-| `/api/areas/{geoid}`             | Name, bbox and simplified outline                              |
-| `/api/areas/{geoid}/profile`     | Totals, rate, ranking, trend and breakdowns vs. the nation     |
-| `/api/search?q=`                 | States and counties by name (`cook il` works)                  |
+| `/api/crashes/summary`             | National totals and crashes per year                         |
+| `/api/crashes/viewport?bbox=`      | Totals, road users and top counties inside a bbox            |
+| `/api/crashes/{id}`                | One crash and the people involved                            |
+| `/api/areas/metrics?metric=`       | `rate`, `deaths` or `crashes` for every state and county     |
+| `/api/areas/{geoid}`               | Name, bbox and simplified outline                            |
+| `/api/areas/{geoid}/profile`       | Totals, rate, ranking, trend and breakdowns vs. the nation   |
+| `/api/search?q=`                   | States and counties by name (`cook il` works)                |
 
 Bounding boxes are `minLng,minLat,maxLng,maxLat` in EPSG:4326.
 
 ## Scripts
 
-| Command          | What it does                                  |
-| ---------------- | --------------------------------------------- |
-| `pnpm dev`       | Start the dev server                          |
-| `pnpm build`     | Production build                              |
-| `pnpm typecheck` | TypeScript check                              |
-| `pnpm lint`      | ESLint                                        |
-| `pnpm test`      | Unit tests (Vitest, `src` and `scripts`)      |
-| `pnpm test:e2e`  | End-to-end tests (Playwright, `tests/e2e`)    |
+| Command          | What it does                               |
+| ---------------- | ------------------------------------------ |
+| `pnpm dev`       | Start the dev server                       |
+| `pnpm build`     | Production build                           |
+| `pnpm typecheck` | TypeScript check                           |
+| `pnpm lint`      | ESLint                                     |
+| `pnpm test`      | Unit tests (Vitest, `src` and `scripts`)   |
+| `pnpm test:e2e`  | End-to-end tests (Playwright, `tests/e2e`) |
 
 Run `pnpm exec playwright install chromium` once before the first e2e run.
 

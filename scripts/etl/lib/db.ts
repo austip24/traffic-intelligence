@@ -14,10 +14,12 @@ for (const file of [".env.local", ".env"]) {
  * transactions and large statements don't belong on a transaction pooler.
  */
 export function connect() {
-  const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL
+  const url =
+    process.env.TRAFFIC_INTELLIGENCE_DATABASE_URL_UNPOOLED ??
+    process.env.TRAFFIC_INTELLIGENCE_DATABASE_URL
   if (!url) {
     throw new Error(
-      "Set DATABASE_URL (and ideally DATABASE_URL_UNPOOLED) in .env.local or .env. See .env.example."
+      "Set TRAFFIC_INTELLIGENCE_DATABASE_URL (and ideally TRAFFIC_INTELLIGENCE_DATABASE_URL_UNPOOLED) in .env.local or .env. See .env.example."
     )
   }
   const client = postgres(url, { max: 1, onnotice: () => {} })

@@ -664,7 +664,7 @@ containing variable names but never actual credentials.
 Example:
 
 ```env
-DATABASE_URL=
+TRAFFIC_INTELLIGENCE_DATABASE_URL=
 MAP_STYLE_URL=
 PUBLIC_DATA_API_URL=
 ```

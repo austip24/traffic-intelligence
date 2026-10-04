@@ -4,7 +4,7 @@ import { z } from "zod"
 
 const serverEnvSchema = z.object({
   /** Pooled connection string (Vercel Postgres / Neon). */
-  DATABASE_URL: z.string().min(1).startsWith("postgres"),
+  TRAFFIC_INTELLIGENCE_DATABASE_URL: z.string().min(1).startsWith("postgres"),
 })
 
 let cached: z.infer<typeof serverEnvSchema> | undefined

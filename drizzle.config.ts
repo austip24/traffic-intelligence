@@ -14,7 +14,10 @@ export default defineConfig({
   casing: "snake_case",
   // Migrations and DDL need a direct (unpooled) connection.
   dbCredentials: {
-    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL ?? "",
+    url:
+      process.env.TRAFFIC_INTELLIGENCE_DATABASE_URL_UNPOOLED ??
+      process.env.TRAFFIC_INTELLIGENCE_DATABASE_URL ??
+      "",
   },
   // Ignore PostGIS-owned objects such as spatial_ref_sys.
   extensionsFilters: ["postgis"],
